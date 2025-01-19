@@ -72,7 +72,7 @@ const Projects = () => {
               >
                 {imageUrl ? (
                   <img
-                    src={`http://localhost:1337${imageUrl}`}
+                    src={`https://portfolio-backend-311n.onrender.com${imageUrl}`}
                     alt={title}
                     className="w-full h-40 object-cover"
                   />
