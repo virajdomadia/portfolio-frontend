@@ -10,10 +10,10 @@ const Projects = () => {
     const fetchProjects = async () => {
       try {
         const token =
-          "1c996af91d6d466be7f691cc51cd3bdc7ac5b43241b23467213986e5ef38ceb75e0b24a8504172603e632ef124ee8bd023b1d8acc2a5547bcff7f58d1776fd622771106341d8d234e3daaa17a58a0f043c3179d9873fa490e7d9994b16fbd907d5c542aff6ceb4f510bb90ccc34c131cacd0d4816d770abf2e38d0268e5116d1"; // Replace with your actual token
+          "536e0034a3491a9103808cf524abd22aa3131cbd3315c87585f081dfae5f29f7741774ad6ad2b90a18d32e299f7b15f98138d7ae0132af4c6dd400bdab6b66fb0ba9a1aa9d1ebf159007ee90b1a38d63bc21df5de5b58571fa887b2d395f7d4c7dea76a0a4133b4327e84049f18156691ba91ba590b2ebde930bc9289e62da6f"; // Replace with your actual token
 
         const response = await axios.get(
-          "http://localhost:1337/api/projects?populate=*",
+          "https://portfolio-backend-311n.onrender.com/api/projects?populate=*",
           {
             headers: {
               Authorization: `Bearer ${token}`,
