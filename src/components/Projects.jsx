@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -26,6 +27,7 @@ const Projects = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching projects:", error);
+        setError("Failed to load projects. Please try again later.");
         setLoading(false);
       }
     };
@@ -43,6 +45,8 @@ const Projects = () => {
       >
         My Projects
       </motion.h1>
+
+      {error && <p className="text-lg text-red-600">{error}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {loading ? (
