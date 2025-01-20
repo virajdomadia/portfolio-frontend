@@ -2,17 +2,15 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 const Contact = () => {
-  // State to handle form inputs
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    contact: "",
     message: "",
   });
 
-  // State to handle form submission
   const [status, setStatus] = useState("");
 
-  // Handle form input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -21,30 +19,84 @@ const Contact = () => {
     }));
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const addDataToGoogleSheets = async (data) => {
+    const SHEET_ID = "YOUR_SHEET_ID"; // Replace with your Google Sheet ID
+    const API_KEY = "YOUR_GOOGLE_API_KEY"; // Replace with your Google API Key
+    const RANGE = "Sheet1!A:D"; // Adjust range based on your Google Sheet
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=RAW&key=${API_KEY}`;
+
+    const body = {
+      values: [[data.name, data.email, data.contact, data.message]],
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to add data to Google Sheets");
+    }
+
+    return response.json();
+  };
+
+  const addDataToStrapi = async (data) => {
+    const STRAPI_URL =
+      "https://portfolio-backend-311n.onrender.com/api/contactmessage"; // Replace with your Strapi API endpoint
+    const STRAPI_TOKEN =
+      "536e0034a3491a9103808cf524abd22aa3131cbd3315c87585f081dfae5f29f7741774ad6ad2b90a18d32e299f7b15f98138d7ae0132af4c6dd400bdab6b66fb0ba9a1aa9d1ebf159007ee90b1a38d63bc21df5de5b58571fa887b2d395f7d4c7dea76a0a4133b4327e84049f18156691ba91ba590b2ebde930bc9289e62da6f"; // Replace with your Strapi API token
+
+    const response = await fetch(STRAPI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${STRAPI_TOKEN}`,
+      },
+      body: JSON.stringify({ data }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to add data to Strapi");
+    }
+
+    return response.json();
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Simple validation
-    if (!formData.name || !formData.email || !formData.message) {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.contact ||
+      !formData.message
+    ) {
       setStatus("Please fill out all fields.");
       return;
     }
 
-    // Simulate form submission (later this can be replaced with an API call)
-    setTimeout(() => {
+    try {
+      // Add data to Google Sheets
+      await addDataToGoogleSheets(formData);
+
+      // Add data to Strapi
+      await addDataToStrapi(formData);
+
       setStatus("Message sent successfully!");
-      setFormData({
-        name: "",
-        email: "",
-        message: "",
-      });
-    }, 1000);
+      setFormData({ name: "", email: "", contact: "", message: "" });
+    } catch (error) {
+      console.error(error);
+      setStatus("Error submitting form. Please try again.");
+    }
   };
 
   return (
     <div className="min-h-screen py-10 px-6 lg:px-40 bg-gray-100 dark:bg-gray-900 dark:text-white">
-      {/* Page Title */}
       <motion.h1
         className="text-4xl font-bold text-center mb-10"
         initial={{ opacity: 0 }}
@@ -54,9 +106,7 @@ const Contact = () => {
         Let's Connect
       </motion.h1>
 
-      {/* Contact Layout */}
       <div className="flex flex-col lg:flex-row justify-between items-start gap-10">
-        {/* Form Container (Left Side) */}
         <div className="lg:w-1/2 w-full">
           <motion.form
             onSubmit={handleSubmit}
@@ -65,7 +115,6 @@ const Contact = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
           >
-            {/* Name Input */}
             <div className="flex flex-col">
               <label htmlFor="name" className="text-lg font-semibold mb-2">
                 Name
@@ -81,7 +130,6 @@ const Contact = () => {
               />
             </div>
 
-            {/* Email Input */}
             <div className="flex flex-col">
               <label htmlFor="email" className="text-lg font-semibold mb-2">
                 Email
@@ -97,7 +145,21 @@ const Contact = () => {
               />
             </div>
 
-            {/* Message Input */}
+            <div className="flex flex-col">
+              <label htmlFor="contact" className="text-lg font-semibold mb-2">
+                Contact Number
+              </label>
+              <input
+                type="text"
+                id="contact"
+                name="contact"
+                value={formData.contact}
+                onChange={handleInputChange}
+                className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                placeholder="Your Contact Number"
+              />
+            </div>
+
             <div className="flex flex-col">
               <label htmlFor="message" className="text-lg font-semibold mb-2">
                 Message
@@ -113,7 +175,6 @@ const Contact = () => {
               />
             </div>
 
-            {/* Submit Button */}
             <div className="flex justify-center">
               <button
                 type="submit"
@@ -124,7 +185,6 @@ const Contact = () => {
             </div>
           </motion.form>
 
-          {/* Status Message */}
           {status && (
             <motion.div
               className="mt-6 text-center text-xl"
@@ -143,77 +203,6 @@ const Contact = () => {
               </p>
             </motion.div>
           )}
-        </div>
-
-        {/* Contact Info Container (Right Side) */}
-        <div className="lg:w-1/3 w-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
-          <motion.div
-            className="space-y-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-              Contact Information
-            </h2>
-            <div className="flex items-center gap-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-red-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 12.79V21l-4.36-2.36c-.84-.47-1.9-.38-2.66.28L11 18.79V5.21l2.98-1.58c.76-.39 1.68-.24 2.36.42L21 12.79z"
-                />
-              </svg>
-              <span className="text-xl font-semibold">
-                Phone: +91 88280 91294
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-red-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 12.79V21l-4.36-2.36c-.84-.47-1.9-.38-2.66.28L11 18.79V5.21l2.98-1.58c.76-.39 1.68-.24 2.36.42L21 12.79z"
-                />
-              </svg>
-              <span className="text-xl font-semibold">
-                Email: virajdomadia6@gmail.com
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-red-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 12.79V21l-4.36-2.36c-.84-.47-1.9-.38-2.66.28L11 18.79V5.21l2.98-1.58c.76-.39 1.68-.24 2.36.42L21 12.79z"
-                />
-              </svg>
-              <span className="text-xl font-semibold">
-                Address: Mumbai, Maharashtra, India
-              </span>
-            </div>
-          </motion.div>
         </div>
       </div>
     </div>
