@@ -20,8 +20,8 @@ const Contact = () => {
   };
 
   const addDataToGoogleSheets = async (data) => {
-    const SHEET_ID = "YOUR_SHEET_ID"; // Replace with your Google Sheet ID
-    const API_KEY = "YOUR_GOOGLE_API_KEY"; // Replace with your Google API Key
+    const SHEET_ID = "1_BmZiyXWcJ7FwIYrH1eL4hsc2D50pfsMbyukqd24Vx4"; // Replace with your Google Sheet ID
+    const API_KEY = "AIzaSyCpEBnPt5I3-gnJd0k34JBUNGrYZ6JQkAo"; // Replace with your Google API Key
     const RANGE = "Sheet1!A:D"; // Adjust range based on your Google Sheet
 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=RAW&key=${API_KEY}`;
