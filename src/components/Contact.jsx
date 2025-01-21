@@ -21,28 +21,55 @@ const Contact = () => {
 
   const addDataToGoogleSheets = async (data) => {
     const SHEET_ID = "1_BmZiyXWcJ7FwIYrH1eL4hsc2D50pfsMbyukqd24Vx4"; // Replace with your Google Sheet ID
-    const API_KEY = "AIzaSyCpEBnPt5I3-gnJd0k34JBUNGrYZ6JQkAo"; // Replace with your Google API Key
     const RANGE = "Sheet1!A:D"; // Adjust range based on your Google Sheet
+    const CLIENT_ID =
+      "55343560176-22hv44t49lvk47fcqrbppfidchg0brtq.apps.googleusercontent.com"; // Replace with your Google OAuth2 Client ID
+    const CLIENT_SECRET = "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"; // Replace with your Google OAuth2 Client Secret
+    const REFRESH_TOKEN =
+      "1//04GYVLXFadpUaCgYIARAAGAQSNwF-L9IrlZamWWffZomdM0S2J_j99e6pSMv2quOen_5tlAff2M6bjuc7qGx3vWFbMPOnT-VfzTU"; // Replace with your stored Refresh Token
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=RAW&key=${API_KEY}`;
+    // Step 1: Get a new access token using the refresh token
+    const tokenUrl = "https://oauth2.googleapis.com/token";
+    const tokenResponse = await fetch(tokenUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        refresh_token: REFRESH_TOKEN,
+        grant_type: "refresh_token",
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      throw new Error("Failed to obtain access token");
+    }
+
+    const { access_token } = await tokenResponse.json();
+
+    // Step 2: Use the access token to add data to Google Sheets
+    const sheetsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=RAW`;
 
     const body = {
       values: [[data.name, data.email, data.contact, data.message]],
     };
 
-    const response = await fetch(url, {
+    const sheetsResponse = await fetch(sheetsUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
       },
       body: JSON.stringify(body),
     });
 
-    if (!response.ok) {
+    if (!sheetsResponse.ok) {
       throw new Error("Failed to add data to Google Sheets");
     }
 
-    return response.json();
+    return sheetsResponse.json();
   };
 
   const addDataToStrapi = async (data) => {
